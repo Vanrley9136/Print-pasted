@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print Pasted Images</title>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="shortcut icon" href="/print.svg" type="image/x-icon">
+<!-- Custom CSS -->
+<style>
+    body {
+        background-color: #121212;
+        color: #fff;
+        font-family: 'Poppins', sans-serif;
+    }
+    .container {
+        max-width: 600px;
+    }
+    h1, p {
+        color: #fff;
+    }
+    .image-container {
+        background-color: #333;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border: 2px solid #fff; /* Adiciona uma borda branca */
+    }
+    .pasted-image {
+        max-width: 100%;
+        border-radius: 5px;
+    }
+    .print-btn {
+        margin-top: 10px;
+    }
+</style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col">
+            <h1>Print Pasted Images</h1>
+            <p>Paste your image here:</p>
+            <div id="imageContainer"></div>
+            <button id="printBtn" class="btn btn-primary">Imprimir</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função para imprimir uma imagem
+    function printImage(imageSrc) {
+        const printWindow = window.open();
+        printWindow.document.open();
+        printWindow.document.write('<img src="' + imageSrc + '" style="max-width: 100%;">');
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 1000);
+    }
+
+    // Função para adicionar uma imagem ao contêiner
+    function addImage(imageSrc) {
+        const imageContainer = document.getElementById('imageContainer');
+        const div = document.createElement('div');
+        div.className = 'image-container';
+        const img = document.createElement('img');
+        img.className = 'pasted-image img-fluid';
+        img.src = imageSrc;
+        div.appendChild(img);
+        imageContainer.appendChild(div);
+    }
+
+    // Adiciona um ouvinte de eventos para o clique no botão de impressão de todas as imagens
+    document.getElementById('printBtn').addEventListener('click', function() {
+        const images = document.querySelectorAll('.pasted-image');
+        images.forEach(function(image) {
+            printImage(image.src);
+        });
+    });
+
+    // Adiciona um ouvinte de eventos para o evento de colagem
+    document.addEventListener('paste', function(event) {
+        const items = (event.clipboardData || window.clipboardData).items;
+
+        // Verifica se há itens colados
+        if (items) {
+            for (const item of items) {
+                // Verifica se o item é uma imagem
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    
+                    // Lê o blob como uma URL de dados
+                    reader.onload = function(event) {
+                        const imageSrc = event.target.result;
+                        addImage(imageSrc);
+                    };
+                    
+                    reader.readAsDataURL(blob);
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
